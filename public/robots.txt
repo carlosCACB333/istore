@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://intellistore.vercel.app
+
+# Sitemaps
+Sitemap: https://intellistore.vercel.app/sitemap.xml
