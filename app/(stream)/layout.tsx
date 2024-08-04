@@ -1,9 +1,14 @@
-import { InputForm } from "@/components/stream/input-form";
-import { PickModel } from "@/components/stream/pick-model";
-import { RenderUI } from "@/components/stream/render-ui";
+import { AI } from "@/actions/stream-state";
+import "@/config/env";
 import { text } from "@/config/primitives";
+import { AIProvider } from "@/stores/ai";
+import "@/styles/globals.css";
 
-export default function Home() {
+export default async function StreamLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60dvh] gap-8">
       <div className="text-center">
@@ -28,9 +33,9 @@ export default function Home() {
         </p>
       </div>
 
-      <PickModel />
-      <RenderUI />
-      <InputForm />
+      <AI>
+        <AIProvider apiKey={process.env.OPENAI_API_KEY}>{children}</AIProvider>
+      </AI>
     </div>
   );
 }

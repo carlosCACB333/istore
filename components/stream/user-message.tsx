@@ -1,53 +1,44 @@
 "use client";
+
 import { AI } from "@/actions/stream-state";
-import {
-  ID_ASSISTANT_SUFFIX,
-  ID_TOOL_SUFFIX,
-  ID_USE_SUFFIX,
-} from "@/config/constants";
+import { getuiIds } from "@/config/constants";
 import { text } from "@/config/primitives";
 import { Button } from "@nextui-org/button";
 import { Tooltip } from "@nextui-org/tooltip";
-import { useAIState, useUIState } from "ai/rsc";
-import clsx from "clsx";
+import { useActions, useUIState } from "ai/rsc";
+import { clsx } from "clsx";
+import { ReactNode } from "react";
 import { Close, Logo } from "../common/icons";
 
 interface Props {
   id?: string;
   message: string;
   isLoading?: boolean;
-  children: React.ReactNode;
+  children?: ReactNode;
 }
 
-export const ResponseLayout = ({
-  message,
-  children,
-  isLoading = false,
+export const UserMessage = ({
   id,
+  message,
+  isLoading = false,
+  children,
 }: Props) => {
-  const [iaState, setIaState] = useAIState<typeof AI>();
   const [uiState, setUiState] = useUIState<typeof AI>();
+  const { removeMessage } = useActions<typeof AI>();
 
-  const handleRemove = () => {
-    const iaStateIds = [
-      id + ID_USE_SUFFIX,
-      id + ID_ASSISTANT_SUFFIX,
-      id + ID_TOOL_SUFFIX,
-    ];
+  const handleRemove = async () => {
+    if (!id) return;
     setUiState({
       ...uiState,
-      components: uiState.components.filter((ui) => ui.id !== id),
-    });
-    setIaState({
-      ...iaState,
-      messages: iaState.messages.filter(
-        (message) => !iaStateIds.includes(message.id)
+      components: uiState.components.filter(
+        (ui) => !getuiIds(id).includes(ui.id)
       ),
     });
+    await removeMessage(id);
   };
 
   return (
-    <div>
+    <>
       <div className="flex justify-between">
         <div
           className={clsx("flex gap-4 items-center mb-6", {
@@ -73,6 +64,6 @@ export const ResponseLayout = ({
         )}
       </div>
       {children}
-    </div>
+    </>
   );
 };

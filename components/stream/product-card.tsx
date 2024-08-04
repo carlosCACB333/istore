@@ -1,11 +1,12 @@
 "use client";
 import { AI } from "@/actions/stream-state";
 import { text } from "@/config/primitives";
+import { useAI } from "@/stores/ai";
 import { Product } from "@/types/product";
 import { Button } from "@nextui-org/button";
 import { Card, CardBody, CardFooter } from "@nextui-org/card";
 import { Image } from "@nextui-org/image";
-import { useActions, useAIState, useUIState } from "ai/rsc";
+import { useActions, useUIState } from "ai/rsc";
 import { toast } from "sonner";
 import { Rating } from "../ui/rating";
 
@@ -16,7 +17,7 @@ interface Props {
 export const ProductCard = ({ product }: Props) => {
   const { onSubmitForm, addProductToCart } = useActions<typeof AI>();
   const [uiState, setUIState] = useUIState<typeof AI>();
-  const [aiState] = useAIState<typeof AI>();
+  const { api_key, model } = useAI();
 
   const discount = Math.round(
     ((Number(product.original_price) - Number(product.price)) /
@@ -60,11 +61,13 @@ export const ProductCard = ({ product }: Props) => {
           size="sm"
           isDisabled={uiState.isLoading}
           onClick={async () => {
-            if (!aiState.apiKey.trim()) {
+            if (!api_key.current.trim()) {
               return toast.error("Por favor, ingresa una API Key");
             }
             setUIState((prev) => ({ ...prev, isLoading: true }));
             const component = await onSubmitForm(
+              model.current,
+              api_key.current,
               "Detalle del producto con id: " + product.id
             );
             setUIState((prev) => ({

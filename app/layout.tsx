@@ -1,4 +1,3 @@
-import { AI } from "@/actions/stream-state";
 import { Footer } from "@/components/common/footer";
 import { Navbar } from "@/components/common/navbar";
 import "@/config/env";
@@ -30,15 +29,13 @@ export default function RootLayout({
             children: null,
           }}
         >
-         <AI>
-            <div className="relative flex flex-col h-dvh">
-              <Navbar />
-              <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
-                {children}
-              </main>
-              <Footer />
-            </div>
-         </AI>
+          <div className="relative flex flex-col h-dvh">
+            <Navbar />
+            <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
+              {children}
+            </main>
+            <Footer />
+          </div>
         </Providers>
       </body>
     </html>

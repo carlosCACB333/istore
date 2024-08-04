@@ -1,12 +1,10 @@
 "use client";
-import { AI } from "@/actions/stream-state";
 import {
   GithubIcon,
   HeartFilledIcon,
   Logo,
   SearchIcon,
-  Shop,
-  TwitterIcon,
+  TwitterIcon
 } from "@/components/common/icons";
 import { ThemeSwitch } from "@/components/common/theme-switch";
 import { siteConfig } from "@/config/site";
@@ -23,10 +21,7 @@ import {
   NavbarMenuToggle,
   Navbar as NextUINavbar,
 } from "@nextui-org/navbar";
-import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/popover";
-import { useAIState } from "ai/rsc";
 import NextLink from "next/link";
-import { CartShop } from "../stream/cart-shop";
 
 const searchInput = (
   <Input
@@ -50,7 +45,6 @@ const searchInput = (
 );
 
 export const Navbar = () => {
-  const [aiState] = useAIState<typeof AI>();
   return (
     <NextUINavbar maxWidth="xl" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
@@ -78,20 +72,7 @@ export const Navbar = () => {
         <NavbarItem>
           <ThemeSwitch />
         </NavbarItem>
-        <NavbarItem>
-          <Popover showArrow>
-            <PopoverTrigger>
-              <Button isIconOnly variant="light" size="sm" aria-label="Cart">
-                <Shop className="text-default-500 relative" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-4 max-h-[600px] ">
-              <div className="overflow-auto">
-                <CartShop items={aiState.cart} />
-              </div>
-            </PopoverContent>
-          </Popover>
-        </NavbarItem>
+
         <NavbarItem className="hidden md:flex">
           <Button
             isExternal

@@ -1,9 +1,10 @@
 "use client";
 
 import { AI } from "@/actions/stream-state";
+import { useAI } from "@/stores/ai";
 import { Category } from "@/types/product";
 import { Card, CardHeader } from "@nextui-org/card";
-import { useActions, useAIState, useUIState } from "ai/rsc";
+import { useActions, useUIState } from "ai/rsc";
 import { toast } from "sonner";
 import { NotFound } from "../common/not-found";
 
@@ -14,7 +15,7 @@ interface Props {
 export const CategoryList = ({ categories = [] }: Props) => {
   const { onSubmitForm } = useActions<typeof AI>();
   const [_, setUIState] = useUIState<typeof AI>();
-  const [aiState] = useAIState<typeof AI>();
+  const { api_key, model } = useAI();
 
   if (categories.length === 0) return <NotFound />;
 
@@ -27,11 +28,13 @@ export const CategoryList = ({ categories = [] }: Props) => {
             isPressable
             className="w-full"
             onClick={async () => {
-              if (!aiState.apiKey.trim()) {
+              if (!api_key.current.trim()) {
                 return toast.error("Por favor, ingresa una API Key");
               }
               setUIState((prev) => ({ ...prev, isLoading: true }));
               const component = await onSubmitForm(
+                model.current,
+                api_key.current,
                 "Productos de la categoría con id: " + category.id
               );
               setUIState((prev) => ({

@@ -1,24 +1,17 @@
-import { MODELS } from "@/config/constants";
+import { getAiIds } from "@/config/constants";
 import { AIActions } from "@/types";
+import { Chat } from "@/types/chat";
 import { Cart, Product } from "@/types/product";
-import { CoreMessage } from "ai";
-import { createAI, getMutableAIState } from "ai/rsc";
-import { nanoid } from "nanoid";
+import { createAI, getAIState, getMutableAIState } from "ai/rsc";
 import { ReactNode } from "react";
-import { streamComponent } from "./stream-ui";
+import { saveChat } from "./chat";
+import { getUIStateFromAIState, streamComponent } from "./stream-ui";
 import { createNewCart } from "./utils";
 
-type Message = CoreMessage & {
-  id: string;
-};
-
-export interface AIState {
-  id: string;
-  model: string;
-  apiKey: string;
-  messages: Message[];
+export type AIState = Chat & {
   cart: Cart[];
-}
+  saveState: "INIT" | "SAVED" | "RESTORED";
+};
 export interface UIState {
   isLoading: boolean;
   components: { id: string; component: ReactNode }[];
@@ -28,19 +21,29 @@ export interface ActionState extends AIActions {
   onSubmitForm: typeof onSubmitForm;
   addProductToCart: typeof addProductToCart;
   removeProductFromCart: typeof removeProductFromCart;
-  setApiKey: typeof setApiKey;
-  setModel: typeof setModel;
+  removeMessage: typeof removeMessage;
+  resetAIState: typeof resetAIState;
 }
 
+const initAIState: AIState = {
+  api_key: "",
+  model: "",
+  id: "",
+  messages: [],
+  cart: [],
+  saveState: "INIT",
+};
+
 export const onSubmitForm = async (
+  model: string,
+  api_key: string,
   input: string
 ): Promise<{
   component: ReactNode;
   id: string;
 }> => {
   "use server";
-
-  return await streamComponent(input);
+  return await streamComponent(model, api_key, input);
 };
 
 const addProductToCart = async (
@@ -69,32 +72,28 @@ const removeProductFromCart = async (product: Product): Promise<void> => {
   });
 };
 
-const setApiKey = async (apiKey: string) => {
+const removeMessage = async (id: string) => {
   "use server";
+  const aiIds = getAiIds(id);
   const aiState = getMutableAIState<typeof AI>();
+  const state = aiState.get();
   aiState.done({
-    ...aiState.get(),
-    apiKey,
+    ...state,
+    messages: state.messages.filter((message) => !aiIds.includes(message.id)),
   });
 };
 
-const setModel = async (model: string) => {
+const resetAIState = async () => {
   "use server";
   const aiState = getMutableAIState<typeof AI>();
   aiState.done({
-    ...aiState.get(),
-    model,
+    ...initAIState,
+    saveState: "RESTORED",
   });
 };
 
 export const AI = createAI<AIState, UIState, ActionState>({
-  initialAIState: {
-    model: MODELS.at(-1)!,
-    apiKey: process.env.OPENAI_API_KEY || "",
-    id: nanoid(),
-    messages: [],
-    cart: [],
-  },
+  initialAIState: initAIState,
   initialUIState: {
     isLoading: false,
     components: [],
@@ -103,7 +102,34 @@ export const AI = createAI<AIState, UIState, ActionState>({
     onSubmitForm,
     addProductToCart,
     removeProductFromCart,
-    setApiKey,
-    setModel,
+    removeMessage,
+    resetAIState,
+  },
+  onSetAIState: async ({ state, done }) => {
+    "use server";
+
+    console.log("Saving chat", state);
+
+    if (!done || state.saveState === "SAVED") return;
+
+    const chat = {
+      ...state,
+      messages: state.messages.filter((message) => message.role !== "tool"),
+    };
+
+    await saveChat(chat);
+  },
+
+  onGetUIState: async () => {
+    "use server";
+    const state = getAIState() as AIState;
+
+    if (!state) {
+      return undefined;
+    }
+
+    const ui = getUIStateFromAIState(state);
+
+    return ui;
   },
 });
