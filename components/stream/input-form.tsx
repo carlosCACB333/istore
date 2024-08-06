@@ -145,11 +145,6 @@ export const InputForm = () => {
                 case "save": {
                   const { id } = aiState;
                   if (!id) return;
-                  await resetAIState();
-                  setUIState((prev) => ({
-                    ...prev,
-                    components: [],
-                  }));
                   router.push("/" + id);
                   break;
                 }

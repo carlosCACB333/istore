@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const ProductCard = ({ product }: Props) => {
-  const { onSubmitForm, addProductToCart } = useActions<typeof AI>();
+  const { onSubmitForm } = useActions<typeof AI>();
   const [uiState, setUIState] = useUIState<typeof AI>();
   const { api_key, model } = useAI();
 
@@ -86,8 +86,20 @@ export const ProductCard = ({ product }: Props) => {
           color="primary"
           size="sm"
           onClick={async () => {
-            await addProductToCart(product, 1);
-            toast.success("Producto agregado al carrito");
+            if (!api_key.current.trim()) {
+              return toast.error("Por favor, ingresa una API Key");
+            }
+            setUIState((prev) => ({ ...prev, isLoading: true }));
+            const component = await onSubmitForm(
+              model.current,
+              api_key.current,
+              "Agregar al carrito el producto con id: " + product.id
+            );
+            setUIState((prev) => ({
+              ...prev,
+              isLoading: false,
+              components: [...prev.components, component],
+            }));
           }}
           aria-label="Agregar al carrito"
         >

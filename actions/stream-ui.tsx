@@ -24,7 +24,6 @@ import { getMutableAIState, streamUI } from "ai/rsc";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { finAllCategories } from "./category";
-import { saveChat } from "./chat";
 import {
   findProductById,
   findProductsBycategoryId,
@@ -366,13 +365,12 @@ const setIAStateWithToolResult = async (
   args: any,
   result: any
 ) => {
-  const toolCallId = id + "_tool_call_id";
+  const toolCallId = "call." + id;
 
-  state.update({
+  state.done({
     ...state.get(),
     messages: [
       ...state.get().messages,
-
       {
         id: ID_ASSIS_PREFIX + id,
         role: "assistant",
@@ -385,21 +383,6 @@ const setIAStateWithToolResult = async (
           },
         ],
       },
-    ],
-  });
-
-  if (state.get().saveState === "INIT") {
-    await saveChat(state.get());
-    state.update({
-      ...state.get(),
-      saveState: "SAVED",
-    });
-  }
-
-  state.done({
-    ...state.get(),
-    messages: [
-      ...state.get().messages,
       {
         id: ID_TOOL_PREFIX + id,
         role: "tool",

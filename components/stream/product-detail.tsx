@@ -2,12 +2,13 @@
 
 import { AI } from "@/actions/stream-state";
 import { text } from "@/config/primitives";
+import { useAI } from "@/stores/ai";
 import { ProductFull } from "@/types/product";
 import { Button, ButtonGroup } from "@nextui-org/button";
 import { Chip } from "@nextui-org/chip";
 import { Image } from "@nextui-org/image";
 import { Radio, RadioGroup } from "@nextui-org/radio";
-import { useActions } from "ai/rsc";
+import { useActions, useUIState } from "ai/rsc";
 import clsx from "clsx";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -22,7 +23,9 @@ interface Props {
 export const ProductDetail = ({ product }: Props) => {
   const [image, setImage] = useState(product?.images[0]);
   const [count, setCount] = useState(1);
-  const { addProductToCart } = useActions<typeof AI>();
+  const { onSubmitForm } = useActions<typeof AI>();
+  const [, setUIState] = useUIState<typeof AI>();
+  const { api_key, model } = useAI();
 
   if (!product) return <NotFound />;
 
@@ -149,7 +152,21 @@ export const ProductDetail = ({ product }: Props) => {
             color="primary"
             fullWidth
             onClick={async () => {
-              await addProductToCart(product, count);
+              if (!api_key.current.trim()) {
+                return toast.error("Por favor, ingresa una API Key");
+              }
+              setUIState((prev) => ({ ...prev, isLoading: true }));
+              const component = await onSubmitForm(
+                model.current,
+                api_key.current,
+                "Agregar al carrito el producto con id: " + product.id
+              );
+              setUIState((prev) => ({
+                ...prev,
+                isLoading: false,
+                components: [...prev.components, component],
+              }));
+
               toast.success("Producto agregado al carrito");
             }}
           >

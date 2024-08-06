@@ -1,16 +1,14 @@
 import { getAiIds } from "@/config/constants";
 import { AIActions } from "@/types";
 import { Chat } from "@/types/chat";
-import { Cart, Product } from "@/types/product";
+import { Cart } from "@/types/product";
 import { createAI, getAIState, getMutableAIState } from "ai/rsc";
 import { ReactNode } from "react";
 import { saveChat } from "./chat";
 import { getUIStateFromAIState, streamComponent } from "./stream-ui";
-import { createNewCart } from "./utils";
 
 export type AIState = Chat & {
   cart: Cart[];
-  saveState: "INIT" | "SAVED" | "RESTORED";
 };
 export interface UIState {
   isLoading: boolean;
@@ -19,8 +17,6 @@ export interface UIState {
 
 export interface ActionState extends AIActions {
   onSubmitForm: typeof onSubmitForm;
-  addProductToCart: typeof addProductToCart;
-  removeProductFromCart: typeof removeProductFromCart;
   removeMessage: typeof removeMessage;
   resetAIState: typeof resetAIState;
 }
@@ -31,7 +27,6 @@ const initAIState: AIState = {
   id: "",
   messages: [],
   cart: [],
-  saveState: "INIT",
 };
 
 export const onSubmitForm = async (
@@ -44,32 +39,6 @@ export const onSubmitForm = async (
 }> => {
   "use server";
   return await streamComponent(model, api_key, input);
-};
-
-const addProductToCart = async (
-  product: Product,
-  quantity: number
-): Promise<void> => {
-  "use server";
-  const aiState = getMutableAIState<typeof AI>();
-  const newCart = createNewCart(aiState.get().cart, product, quantity);
-
-  aiState.done({
-    ...aiState.get(),
-    cart: newCart,
-  });
-};
-
-const removeProductFromCart = async (product: Product): Promise<void> => {
-  "use server";
-  const aiState = getMutableAIState<typeof AI>();
-  const cart = aiState
-    .get()
-    .cart.filter((item) => item.product.id !== product.id);
-  aiState.done({
-    ...aiState.get(),
-    cart,
-  });
 };
 
 const removeMessage = async (id: string) => {
@@ -87,8 +56,9 @@ const resetAIState = async () => {
   "use server";
   const aiState = getMutableAIState<typeof AI>();
   aiState.done({
-    ...initAIState,
-    saveState: "RESTORED",
+    ...aiState.get(),
+    messages: [],
+    cart: [],
   });
 };
 
@@ -100,8 +70,6 @@ export const AI = createAI<AIState, UIState, ActionState>({
   },
   actions: {
     onSubmitForm,
-    addProductToCart,
-    removeProductFromCart,
     removeMessage,
     resetAIState,
   },
@@ -110,7 +78,7 @@ export const AI = createAI<AIState, UIState, ActionState>({
 
     console.log("Saving chat", state);
 
-    if (!done || state.saveState === "SAVED") return;
+    if (!done) return;
 
     const chat = {
       ...state,

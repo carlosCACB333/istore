@@ -10,7 +10,6 @@ import { ThemeSwitch } from "@/components/common/theme-switch";
 import { siteConfig } from "@/config/site";
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
-import { Kbd } from "@nextui-org/kbd";
 import { Link } from "@nextui-org/link";
 import {
   NavbarBrand,
@@ -30,11 +29,7 @@ const searchInput = (
       inputWrapper: "bg-default-100",
       input: "text-sm",
     }}
-    endContent={
-      <Kbd className="hidden lg:inline-block" keys={["command"]}>
-        K
-      </Kbd>
-    }
+   
     labelPlacement="outside"
     placeholder="Search..."
     startContent={

@@ -1,5 +1,6 @@
 import { Footer } from "@/components/common/footer";
 import { Navbar } from "@/components/common/navbar";
+import { __PROD__ } from "@/config/constants";
 import "@/config/env";
 import { fontRoboto } from "@/config/fonts";
 import { siteConfig } from "@/config/site";
@@ -23,7 +24,6 @@ export default function RootLayout({
           fontRoboto.variable
         )}
       >
-        <Analytics />
         <Providers
           themeProps={{
             attribute: "class",
@@ -39,6 +39,7 @@ export default function RootLayout({
             <Footer />
           </div>
         </Providers>
+        {__PROD__ && <Analytics />}
       </body>
     </html>
   );

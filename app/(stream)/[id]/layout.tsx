@@ -75,7 +75,6 @@ const ChatLayout = async ({ params, children }: Props) => {
         case "clearCart":
           break;
         case "default":
-          addToolMsg({});
           break;
       }
     }
@@ -86,7 +85,6 @@ const ChatLayout = async ({ params, children }: Props) => {
         ...data,
         messages: messages,
         cart: [],
-        saveState: "RESTORED",
       }}
     >
       {children}
