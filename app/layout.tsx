@@ -4,6 +4,7 @@ import "@/config/env";
 import { fontRoboto } from "@/config/fonts";
 import { siteConfig } from "@/config/site";
 import "@/styles/globals.css";
+import { Analytics } from "@vercel/analytics/react";
 import clsx from "clsx";
 import { Metadata, Viewport } from "next";
 import { Providers } from "./providers";
@@ -22,6 +23,7 @@ export default function RootLayout({
           fontRoboto.variable
         )}
       >
+        <Analytics />
         <Providers
           themeProps={{
             attribute: "class",
