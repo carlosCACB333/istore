@@ -48,34 +48,34 @@ const ChatLayout = async ({ params, children }: Props) => {
       };
 
       switch (content.toolName) {
-        case "searchProduct":
-          const { data: products } = await searchProduct(content.args);
-          addToolMsg(products);
+        case "searchProduct": {
+          const { data } = await searchProduct(content.args);
+          addToolMsg(data);
           break;
-        case "findAllCategories":
-          const { data: categories } = await finAllCategories();
-          addToolMsg(categories);
+        }
+        case "findAllCategories": {
+          const { data } = await finAllCategories();
+          addToolMsg(data);
           break;
-        case "findProductById":
-          const { data: product } = await findProductById(content.args.id);
-          addToolMsg(product);
+        }
+        case "findProductById": {
+          const { data } = await findProductById(content.args.id);
+          addToolMsg(data);
           break;
-        case "findProductsBycategoryId":
-          const { data: productsByCategory } = await findProductsBycategoryId(
-            content.args.id
-          );
-          addToolMsg(productsByCategory);
+        }
+        case "findProductsBycategoryId": {
+          const { data } = await findProductsBycategoryId(content.args.id);
+          addToolMsg(data);
           break;
+        }
         case "showCart":
-          break;
         case "addProductToCart":
-          break;
         case "removeProductFromCart":
+        case "clearCart": {
+          messages.pop();
+          messages.pop();
           break;
-        case "clearCart":
-          break;
-        case "default":
-          break;
+        }
       }
     }
   }
