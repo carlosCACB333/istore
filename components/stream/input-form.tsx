@@ -2,6 +2,7 @@
 import { AI } from "@/actions/stream-state";
 import { MODELS } from "@/config/constants";
 import { text } from "@/config/primitives";
+import { useScroll } from "@/hooks/use-scroll";
 import { useAI } from "@/stores/ai";
 import { Button } from "@nextui-org/button";
 import { Card, CardBody } from "@nextui-org/card";
@@ -15,6 +16,7 @@ import {
 import { Input } from "@nextui-org/input";
 import { useActions, useAIState, useUIState } from "ai/rsc";
 import { useRouter } from "next/navigation";
+import { useRef } from "react";
 import { toast } from "sonner";
 import { ArrowUp, DotsVertical, SearchIcon } from "../common/icons";
 
@@ -43,7 +45,8 @@ export const InputForm = () => {
   const [aiState] = useAIState<typeof AI>();
   const { api_key, model, isMenuOpen, setIsMenuOpen } = useAI();
   const router = useRouter();
-
+  const { visibilityRef } = useScroll();
+  const formRef = useRef<HTMLFormElement>(null);
   const { isLoading } = uiState;
 
   const handleSearch = async (search: string) => {
@@ -66,10 +69,13 @@ export const InputForm = () => {
       isLoading: false,
       components: [...prev.components, component],
     }));
+
+    formRef.current?.reset();
   };
 
   return (
     <form
+      ref={formRef}
       className="w-full mb-16 text-center"
       action={async (data) => {
         const search = data.get("search") as string;
@@ -207,6 +213,7 @@ export const InputForm = () => {
       <span className={text({ color: "disabled", size: "xs" })}>
         Empieza a escribir lo que necesitas y te ayudaremos a encontrarlo
       </span>
+      <div ref={visibilityRef} />
     </form>
   );
 };
